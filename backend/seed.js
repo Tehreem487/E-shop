@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
-dotenv.config();
-
 import connectDB from "./config/db.js";
-import { MONGO_URI } from "./config/config.js";
 import Product from "./models/Product.js";
 
-// Sample products
+dotenv.config();
+
+console.log("MONGO_URI =", process.env.MONGO_URI);
+
 const products = [
   {
     name: "Laptop",
@@ -63,16 +63,17 @@ const products = [
   },
 ];
 
-// Seed function
 const seed = async () => {
   try {
-    await connectDB(); // Connect using config DB
-    await Product.deleteMany({}); // Remove existing products
-    await Product.insertMany(products); // Add sample products
-    console.log("Products seeded successfully.");
+    await connectDB();
+
+    await Product.deleteMany({});
+    await Product.insertMany(products);
+
+    console.log("Products seeded successfully");
     process.exit();
   } catch (err) {
-    console.error("Error seeding products:", err);
+    console.error("Error seeding products:", err.message);
     process.exit(1);
   }
 };
