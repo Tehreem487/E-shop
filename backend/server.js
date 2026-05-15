@@ -11,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [FRONTEND_URL || "http://localhost:5173"],
+    origin: [FRONTEND_URL || "https://e-shop-production-1737.up.railway.app/"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
