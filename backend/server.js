@@ -9,22 +9,42 @@ import cartRoutes from "./routes/cart.js";
 
 const app = express();
 
+// Allowed frontend URLs
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://e-shop-eta-sable.vercel.app",
+  FRONTEND_URL,
+];
+
 app.use(
   cors({
-    origin: [FRONTEND_URL || "https://e-shop-production-1737.up.railway.app/"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (Postman/mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
 
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("✅ Backend server is running on Railway"));
+app.get("/", (req, res) =>
+  res.send("✅ Backend server is running on Railway")
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  app.listen(PORT || 5000, () =>
+    console.log(`🚀 Server running on port ${PORT}`)
+  );
 });

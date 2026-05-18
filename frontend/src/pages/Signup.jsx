@@ -4,11 +4,13 @@ import { ENDPOINTS } from "../config";
 
 const Signup = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,17 +22,22 @@ const Signup = () => {
     try {
       const res = await fetch(ENDPOINTS.SIGNUP, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed");
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
 
       alert("Signup successful! Please login.");
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong. Check backend.");
     } finally {
       setLoading(false);
     }
@@ -61,30 +68,32 @@ const Signup = () => {
         }}
       >
         <h2 style={{ textAlign: "center", color: "#333" }}>Sign Up</h2>
-        {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+
+        {error && (
+          <p style={{ color: "red", fontSize: "14px", textAlign: "center" }}>
+            {error}
+          </p>
+        )}
+
         <input
           placeholder="Name"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, name: e.target.value })
+          }
           required
-          style={{
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
         />
+
         <input
           placeholder="Email"
           type="email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
           required
-          style={{
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
         />
+
         <input
           placeholder="Password"
           type="password"
@@ -93,24 +102,9 @@ const Signup = () => {
             setFormData({ ...formData, password: e.target.value })
           }
           required
-          style={{
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-          }}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: "10px",
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
+
+        <button type="submit" disabled={loading}>
           {loading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
