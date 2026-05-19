@@ -10,42 +10,77 @@ import cartRoutes from "./routes/cart.js";
 
 const app = express();
 
-// ✅ CORS
+
+// ===============================
+// ✅ 1. CORS CONFIG (PROPER WAY)
+// ===============================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://e-shop-eta-sable.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://e-shop-eta-sable.vercel.app",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-// ✅ Middleware
+
+// ===============================
+// ✅ 2. HANDLE PREFLIGHT (CRITICAL FIX FOR RAILWAY)
+// ===============================
+app.options("*", cors());
+
+
+// ===============================
+// ✅ 3. BODY PARSER
+// ===============================
 app.use(express.json());
 
-// ✅ Test Route
+
+// ===============================
+// ✅ 4. TEST ROUTE
+// ===============================
 app.get("/", (req, res) => {
   res.send("Backend running ✔");
 });
 
-// ✅ Routes
+
+// ===============================
+// ✅ 5. ROUTES
+// ===============================
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 
-// ✅ Error Handler
+
+// ===============================
+// ✅ 6. GLOBAL ERROR HANDLER
+// ===============================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Error:", err.message);
 
   res.status(500).json({
     message: err.message || "Server Error",
   });
 });
 
-// ✅ Start Server
+
+// ===============================
+// ✅ 7. START SERVER
+// ===============================
 connectDB()
   .then(() => {
     app.listen(PORT || 5000, () => {

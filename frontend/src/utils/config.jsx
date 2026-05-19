@@ -4,7 +4,7 @@ export const ENDPOINTS = {
   // Auth
   LOGIN: `${API_BASE}/auth/login`,
   SIGNUP: `${API_BASE}/auth/signup`,
-SIGNUP: `${API_BASE}/auth/signup`,
+
   // Products
   PRODUCTS: `${API_BASE}/products`,
 
