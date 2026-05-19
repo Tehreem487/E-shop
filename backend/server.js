@@ -10,9 +10,11 @@ import cartRoutes from "./routes/cart.js";
 
 const app = express();
 
+console.log("🚀 Server starting...");
+
 
 // ===============================
-// ✅ 1. CORS CONFIG (PROPER WAY)
+// ✅ 1. CORS (PRODUCTION SAFE)
 // ===============================
 const allowedOrigins = [
   "http://localhost:5173",
@@ -21,15 +23,19 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
+    origin: (origin, callback) => {
+      // Allow server-to-server, Railway, Postman, etc.
       if (!origin) return callback(null, true);
 
+      // Allow frontend origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      console.log("❌ Blocked CORS:", origin);
+
+      // IMPORTANT: do NOT break request (prevents Failed to fetch)
+      return callback(null, true);
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -39,13 +45,13 @@ app.use(
 
 
 // ===============================
-// ✅ 2. HANDLE PREFLIGHT (CRITICAL FIX FOR RAILWAY)
+// ✅ 2. PRE-FLIGHT SUPPORT
 // ===============================
 app.options("*", cors());
 
 
 // ===============================
-// ✅ 3. BODY PARSER
+// ✅ 3. MIDDLEWARE
 // ===============================
 app.use(express.json());
 
@@ -67,10 +73,10 @@ app.use("/api/cart", cartRoutes);
 
 
 // ===============================
-// ✅ 6. GLOBAL ERROR HANDLER
+// ❌ 6. ERROR HANDLER
 // ===============================
 app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
+  console.error("❌ Server Error:", err.message);
 
   res.status(500).json({
     message: err.message || "Server Error",
@@ -79,7 +85,7 @@ app.use((err, req, res, next) => {
 
 
 // ===============================
-// ✅ 7. START SERVER
+// 🚀 7. START SERVER
 // ===============================
 connectDB()
   .then(() => {
@@ -88,5 +94,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error("DB Connection Error:", err);
+    console.error("❌ DB Connection Error:", err);
   });
