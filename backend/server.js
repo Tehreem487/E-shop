@@ -10,37 +10,48 @@ import cartRoutes from "./routes/cart.js";
 
 const app = express();
 
-// ✅ CORS FIX (FINAL)
+// ✅ CORS
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "https://e-shop-eta-sable.vercel.app",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-// ✅ Preflight support
-app.options("*", cors());
-
-// Middleware
+// ✅ Middleware
 app.use(express.json());
 
-// Routes (IMPORTANT)
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-
-// Test route
+// ✅ Test Route
 app.get("/", (req, res) => {
   res.send("Backend running ✔");
 });
 
-// Start server
-connectDB().then(() => {
-  app.listen(PORT || 5000, () => {
-    console.log(`🚀 Server running on port ${PORT || 5000}`);
+// ✅ Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+
+// ✅ Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  res.status(500).json({
+    message: err.message || "Server Error",
   });
 });
+
+// ✅ Start Server
+connectDB()
+  .then(() => {
+    app.listen(PORT || 5000, () => {
+      console.log(`🚀 Server running on port ${PORT || 5000}`);
+    });
+  })
+  .catch((err) => {
+    console.error("DB Connection Error:", err);
+  });
