@@ -1,7 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config();
+const BASE_URL = "https://e-shop-production-1737.up.railway.app/api";
 
-export const PORT = process.env.PORT || 5000;
-export const JWT_SECRET = process.env.JWT_SECRET;
-export const MONGO_URI = process.env.MONGO_URI;
-export const FRONTEND_URL = process.env.FRONTEND_URL;
+export const ENDPOINTS = {
+  SIGNUP: `${BASE_URL}/auth/signup`,
+  LOGIN: `${BASE_URL}/auth/login`,
+  PRODUCTS: `${BASE_URL}/products`,
+  CART: `${BASE_URL}/cart`,
+};
