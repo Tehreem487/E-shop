@@ -10,53 +10,37 @@ import cartRoutes from "./routes/cart.js";
 
 const app = express();
 
-// ✅ Allowed frontend URLs
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://e-shop-eta-sable.vercel.app",
-];
-
-// ✅ CORS Configuration
+// ✅ CORS FIX (FINAL)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (Postman, mobile apps)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("CORS not allowed"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      "http://localhost:5173",
+      "https://e-shop-eta-sable.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
 
-// ✅ Handle preflight requests
+// ✅ Preflight support
 app.options("*", cors());
 
-// ✅ Middleware
+// Middleware
 app.use(express.json());
 
-// ✅ Test Route
-app.get("/", (req, res) => {
-  res.send("Backend running ✔");
-});
-
-// ✅ API Routes
+// Routes (IMPORTANT)
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 
-// ✅ Start Server
-connectDB()
-  .then(() => {
-    app.listen(PORT || 5000, () => {
-      console.log(`🚀 Server running on port ${PORT || 5000}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Database connection failed:", err);
+// Test route
+app.get("/", (req, res) => {
+  res.send("Backend running ✔");
+});
+
+// Start server
+connectDB().then(() => {
+  app.listen(PORT || 5000, () => {
+    console.log(`🚀 Server running on port ${PORT || 5000}`);
   });
+});
