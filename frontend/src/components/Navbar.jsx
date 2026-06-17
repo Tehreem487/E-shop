@@ -5,37 +5,39 @@ import ROUTES from "../utils/routes";
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const role = user?.role || "guest";
+
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.HOME);
+  };
 
   return (
     <nav className="navbar">
-      <h1 onClick={() => navigate("/")}>Shop</h1>
-      <div>
+      <h1 className="logo" onClick={() => navigate(ROUTES.HOME)}>
+        Shop
+      </h1>
+
+      <div className="nav-links">
         <button onClick={() => navigate(ROUTES.HOME)}>Home</button>
         <button onClick={() => navigate(ROUTES.PRODUCTS)}>Products</button>
         <button onClick={() => navigate(ROUTES.CART)}>Cart</button>
 
-        {!user && (
+        {!user ? (
           <>
             <button onClick={() => navigate(ROUTES.LOGIN)}>Login</button>
             <button onClick={() => navigate(ROUTES.SIGNUP)}>Sign Up</button>
           </>
-        )}
-
-        {user && (
+        ) : (
           <>
-            <span>Hi, {user.name}</span>
-            {role === "admin" && (
+            <span className="user-text">Hi, {user.name}</span>
+
+            {user.role === "admin" && (
               <button onClick={() => navigate(ROUTES.ADMIN_PRODUCTS)}>
-                Manage Products
+                Admin Panel
               </button>
             )}
-            <button
-              onClick={() => {
-                logout();
-                navigate("/");
-              }}
-            >
+
+            <button className="logout-btn" onClick={handleLogout}>
               Logout
             </button>
           </>

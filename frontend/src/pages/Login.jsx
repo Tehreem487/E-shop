@@ -1,38 +1,59 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ENDPOINTS } from "../config";
 import { useAuth } from "../context/AuthContext";
-import "../index.css";
 
-const Login = () => {
-  const { login } = useAuth();
+function Login() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!formData.email || !formData.password) {
       alert("Please fill all fields");
       return;
     }
 
     try {
-      await login(email, password);
+      setLoading(true);
 
-      const user = JSON.parse(localStorage.getItem("user"));
+      const res = await fetch(ENDPOINTS.LOGIN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      alert("Login successful");
+      const data = await res.json();
 
-      if (user.role === "admin") {
-        navigate("/admin/products");
-      } else {
-        navigate("/products");
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
       }
 
+      // store user in context
+      setUser(data.user);
+
+      alert("Login successful");
+      navigate("/");
     } catch (err) {
-      alert("Invalid credentials");
+      alert("Server error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,24 +63,30 @@ const Login = () => {
         <h2>Login</h2>
 
         <input
+          name="email"
           placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
+          value={formData.email}
+          onChange={handleChange}
         />
 
         <input
-          placeholder="Password"
+          name="password"
           type="password"
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
         />
 
-        <button>Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
         <p onClick={() => navigate("/signup")}>
-          Don’t have account? Signup first
+          Don't have an account? Sign up
         </p>
       </form>
     </div>
   );
-};
+}
 
 export default Login;

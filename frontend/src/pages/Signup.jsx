@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ENDPOINTS } from "../config";
-import "../index.css";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -12,15 +11,28 @@ const Signup = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.password) {
+    const { name, email, password } = formData;
+
+    if (!name || !email || !password) {
       alert("Please fill all fields");
       return;
     }
 
     try {
+      setLoading(true);
+
       const res = await fetch(ENDPOINTS.SIGNUP, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,11 +46,12 @@ const Signup = () => {
         return;
       }
 
-      alert("Signup successful! Please login");
+      alert("Signup successful!");
       navigate("/login");
-
     } catch (err) {
       alert("Server error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,28 +61,30 @@ const Signup = () => {
         <h2>Sign Up</h2>
 
         <input
+          name="name"
           placeholder="Name"
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
+          value={formData.name}
+          onChange={handleChange}
         />
 
         <input
+          name="email"
           placeholder="Email"
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
+          value={formData.email}
+          onChange={handleChange}
         />
 
         <input
-          placeholder="Password"
+          name="password"
           type="password"
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
         />
 
-        <button>Signup</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating account..." : "Signup"}
+        </button>
 
         <p onClick={() => navigate("/login")}>
           Already have an account? Login
