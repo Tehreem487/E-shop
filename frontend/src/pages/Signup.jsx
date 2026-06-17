@@ -12,6 +12,7 @@ const Signup = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -22,11 +23,13 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     const { name, email, password } = formData;
 
+    // frontend validation
     if (!name || !email || !password) {
-      alert("Please fill all fields");
+      setError("Please fill all fields");
       return;
     }
 
@@ -35,21 +38,29 @@ const Signup = () => {
 
       const res = await fetch(ENDPOINTS.SIGNUP, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
+      // 🔴 backend error handling
       if (!res.ok) {
-        alert(data.message || "Signup failed");
+        console.log("Signup error response:", data);
+        setError(data.message || "Signup failed");
         return;
       }
 
+      console.log("Signup success:", data);
+
       alert("Signup successful!");
       navigate("/login");
+
     } catch (err) {
-      alert("Server error");
+      console.error("Network error:", err);
+      setError("Server not responding. Try again later.");
     } finally {
       setLoading(false);
     }
@@ -60,11 +71,19 @@ const Signup = () => {
       <form className="auth-card" onSubmit={handleSubmit}>
         <h2>Sign Up</h2>
 
+        {/* error message */}
+        {error && (
+          <p style={{ color: "red", marginBottom: "10px" }}>
+            {error}
+          </p>
+        )}
+
         <input
           name="name"
           placeholder="Name"
           value={formData.name}
           onChange={handleChange}
+          autoComplete="name"
         />
 
         <input
@@ -72,6 +91,7 @@ const Signup = () => {
           placeholder="Email"
           value={formData.email}
           onChange={handleChange}
+          autoComplete="email"
         />
 
         <input
@@ -80,13 +100,17 @@ const Signup = () => {
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
+          autoComplete="new-password"
         />
 
         <button type="submit" disabled={loading}>
           {loading ? "Creating account..." : "Signup"}
         </button>
 
-        <p onClick={() => navigate("/login")}>
+        <p
+          style={{ cursor: "pointer", color: "blue" }}
+          onClick={() => navigate("/login")}
+        >
           Already have an account? Login
         </p>
       </form>
